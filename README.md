@@ -44,9 +44,11 @@ For each assigned cell phone, we show the following information
 
 
 # Caveats
-This will be very simple reporting ( for now ), just ASCII text instead of PDF.
-Command line options will let the user specify the import phone and usage CSV file names/paths, and the year to report usages for.
-The default system print ( or a command line value for printer name to match ) gets the print output of the report.
+* This will be very simple reporting ( for now ), just ASCII text instead of PDF.
+* Command line options will let the user specify the import phone and usage CSV file names/paths, and the year to report usages for.
+* The default system print ( or maybe a command line value for printer name to match ) gets the print output of the report.
 
+# Design
+* Collection classes hold the known cell phones ( by employee id ) and the monthly usage rows.
 
 

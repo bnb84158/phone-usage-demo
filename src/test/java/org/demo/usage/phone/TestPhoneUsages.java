@@ -47,4 +47,28 @@ public class TestPhoneUsages {
                     nFound == nRows );
     } // import usage
 
+    /**
+     * check CSV import year filtering
+     */
+    @Test
+    public void testFilteredUsage() {
+        final String fileTmp = "src/test/resources/" + "CellPhoneUsageByMonth.csv";
+        final int    minRows = 10;
+        final int    filterYear = 2018;
+
+        final PhoneUsages reader = new PhoneUsages();
+        final List<MonthlyUsage> found = reader.importUsage( fileTmp, filterYear );
+
+        final int nFound = ( found != null ? found.size() : 0 );
+        LOG.info( "Imported {} ( expected {} ) monthly phone usage rows from '{}'.",
+                  nFound, minRows, fileTmp );
+
+        assertTrue( "Expected " + nFound + " >== " + minRows + " for '" + fileTmp + "'.",
+                    nFound >= minRows );
+    } // import usage
+
+    
+    
+    
+    
 }

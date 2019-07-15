@@ -34,7 +34,11 @@ public class PhoneUsages {
 
     private static final int MIN_REPORT_YEAR = 1990;
 
+    // current yyyy-MM year & month values in filtered usage rows
     private Set<String> yearMonths = new TreeSet<String>();
+
+    // current employee ids  in filtered usage rows
+    private Set<String> employeeIds = new TreeSet<String>();
 
     private List<MonthlyUsage> monthlyUsage = new ArrayList<MonthlyUsage>();
 
@@ -69,14 +73,23 @@ public class PhoneUsages {
             return found;
         }  // nFound
 
-        final Set<String> yearMonthsTmp = yearMonths;
-        List<MonthlyUsage> filtered = monthlyUsage;
+        final Set<String> yearMonthsTmp        = getYearMonths();
+        final Set<String> filteredEmployeeIds  = getEmployeeIds();
+        List<MonthlyUsage> filtered            = getMonthlyUsage();
         filtered.clear();
         yearMonthsTmp.clear();
+        filteredEmployeeIds.clear();
 
+        Integer minMinutes = null;
+        Integer maxMinutes = null;
+        Double minData  = null;
+        Double maxData  = null;
         for ( final MonthlyUsage usage : found ) {
-            final Integer billYear = usage.getBillingYear();
-            final String  yearMonth = usage.getBillingYearMonth();
+            final Integer billYear   = usage.getBillingYear();
+            final String  yearMonth  = usage.getBillingYearMonth();
+            final String  employeeId = usage.getEmployeeId();
+            final int     minutes    = usage.getTotalMinutes();
+            final double  data       = usage.getTotalData();
             if ( billYear == null || reportYear != billYear ) {
                 LOG.debug( "Skip monthly usage year '{}' .", billYear, reportYear );
                 continue;
@@ -84,11 +97,31 @@ public class PhoneUsages {
 
             yearMonthsTmp.add( yearMonth );
             filtered.add( usage );
+            filteredEmployeeIds.add( employeeId );
+            if ( minMinutes == null || minutes < minMinutes ) {
+            	minMinutes = minutes;
+            } // minMinutes
+            if ( maxMinutes == null || minutes > maxMinutes ) {
+            	maxMinutes = minutes;
+            } // maxMinutes
+            if ( minData == null || data < minData ) {
+            	minData = data;
+            } // minData
+            if ( maxData == null || data > maxData ) {
+            	maxData = data;
+            } // maxData
         } // usage
-        LOG.debug( "Filtered to {} usage rows, {} year-month values, report year {}.", 
-                    filtered.size(), yearMonthsTmp.size(), reportYear );
+        LOG.info( "Report year {} has {} usage rows, {} year-month values, {} employees",
+                   reportYear, 
+                   filtered.size(), yearMonthsTmp.size(), filteredEmployeeIds.size() );
+        LOG.info( "Report year {}, filtered year-months {}.", reportYear, yearMonthsTmp );
+        LOG.info( "Report year {}, filtered employee ids {}.", reportYear, filteredEmployeeIds );
+        LOG.info( "Report year {}, minutes {} - {}, data '{}' - '{}'.", reportYear, 
+                   minMinutes, maxMinutes,
+                   String.format("%.3f", minData ), String.format("%.3f", maxData ) );
+        
 
-        return found;
+        return filtered;
     }
 
 
@@ -121,11 +154,56 @@ public class PhoneUsages {
     }
 
 
-    public static class MonthlyUsage {
+    /**
+	 * @return the yearMonths
+	 */
+	private Set<String> getYearMonths() {
+		return yearMonths;
+	}
+
+	/**
+	 * @param yearMonths the yearMonths to set
+	 */
+	private void setYearMonths(Set<String> yearMonths) {
+		this.yearMonths = yearMonths;
+	}
+
+
+	/**
+	 * @return the monthlyUsage
+	 */
+	private List<MonthlyUsage> getMonthlyUsage() {
+		return monthlyUsage;
+	}
+
+	/**
+	 * @param monthlyUsage the monthlyUsage to set
+	 */
+	private void setMonthlyUsage(List<MonthlyUsage> monthlyUsage) {
+		this.monthlyUsage = monthlyUsage;
+	}
+
+
+	/**
+	 * @return the employeeIds
+	 */
+	private Set<String> getEmployeeIds() {
+		return employeeIds;
+	}
+
+	/**
+	 * @param employeeIds the employeeIds to set
+	 */
+	private void setEmployeeIds(Set<String> employeeIds) {
+		this.employeeIds = employeeIds;
+	}
+
+
+	public static class MonthlyUsage {
 
         private static final Logger LOG = LoggerFactory.getLogger( MonthlyUsage.class );
 
-        @CsvBindByName
+        @CsvBindByName(column = "emplyeeId")
         private String employeeId = "";
 
         @CsvBindByName(column = "date")
